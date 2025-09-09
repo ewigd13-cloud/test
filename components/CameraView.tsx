@@ -4,19 +4,23 @@ import React, { useEffect } from 'react';
 interface CameraViewProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   facingMode: 'user' | 'environment';
+  onStreamReady?: (stream: MediaStream) => void;
 }
 
-export const CameraView: React.FC<CameraViewProps> = ({ videoRef, facingMode }) => {
+export const CameraView: React.FC<CameraViewProps> = ({ videoRef, facingMode, onStreamReady }) => {
   useEffect(() => {
     let stream: MediaStream | null = null;
     const setupCamera = async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode, aspectRatio: 4.3 / 5.7, width: { ideal: 1280 } },
+          video: { facingMode, width: { ideal: 1080 } },
           audio: false,
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+        }
+        if (onStreamReady) {
+          onStreamReady(stream);
         }
       } catch (err) {
         console.error("Error accessing camera:", err);
@@ -32,7 +36,7 @@ export const CameraView: React.FC<CameraViewProps> = ({ videoRef, facingMode }) 
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [videoRef, facingMode]);
+  }, [videoRef, facingMode, onStreamReady]);
 
   return (
     <video
