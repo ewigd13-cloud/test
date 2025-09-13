@@ -557,7 +557,7 @@ const App: React.FC = () => {
                 {!imageSrc ? (
                     <>
                         {isCountingDown ? (
-                            <button onClick={handleCancelCountdown} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-5 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50" aria-label="タイマーをキャンセル">
+                            <button onClick={handleCancelCountdown} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-4 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50" aria-label="タイマーをキャンセル">
                                 <CloseIcon className="h-8 w-8" />
                             </button>
                         ) : (
@@ -570,7 +570,7 @@ const App: React.FC = () => {
                           <button 
                               onClick={toggleFlash} 
                               title={isFlashEnabled ? "フラッシュ OFF" : "フラッシュ ON"} 
-                              className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isFlashEnabled ? 'ring-4 ring-yellow-400' : ''}`} 
+                              className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-3 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isFlashEnabled ? 'ring-4 ring-yellow-400' : ''}`} 
                               aria-label="フラッシュの切り替え"
                               disabled={uiDisabled}
                           >
@@ -581,7 +581,7 @@ const App: React.FC = () => {
                         <button 
                             onClick={() => setIsTimerEnabled(!isTimerEnabled)} 
                             title={isTimerEnabled ? "タイマー OFF" : "10秒タイマー ON"} 
-                            className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isTimerEnabled ? 'ring-4 ring-blue-500' : ''}`} 
+                            className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-3 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isTimerEnabled ? 'ring-4 ring-blue-500' : ''}`} 
                             aria-label="タイマーの切り替え"
                             disabled={uiDisabled}
                         >
