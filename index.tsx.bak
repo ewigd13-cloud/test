@@ -8,9 +8,6 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-const basename = import.meta.env.DEV ? '/' : '/test/';
-
-
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
