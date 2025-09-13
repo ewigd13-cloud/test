@@ -523,10 +523,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-gray-800 min-h-screen flex flex-col items-center justify-center p-4">
-        <header className="text-center mb-4 w-full max-w-lg mx-auto relative">
-            <h1 className="text-4xl font-marker text-white">Whiteboard Photo Booth</h1>
-        </header>
-        
+               
         <div className="w-full max-w-lg mx-auto flex flex-row items-center gap-8">
             <main ref={mainRef} className="flex-1 aspect-[4/3] bg-black rounded-lg shadow-2xl overflow-hidden relative">
                 {imageSrc ? (
