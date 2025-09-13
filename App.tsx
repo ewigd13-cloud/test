@@ -561,7 +561,7 @@ const App: React.FC = () => {
                                 <CloseIcon className="h-8 w-8" />
                             </button>
                         ) : (
-                            <button onClick={handleCapture} className="bg-red-600 hover:bg-red-700 text-white font-bold p-5 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50 disabled:bg-red-900 disabled:cursor-not-allowed" aria-label="写真を撮る" disabled={uiDisabled}>
+                            <button onClick={handleCapture} className="bg-red-600 hover:bg-red-700 text-white font-bold p-4 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50 disabled:bg-red-900 disabled:cursor-not-allowed" aria-label="写真を撮る" disabled={uiDisabled}>
                                 <CameraIcon />
                             </button>
                         )}
