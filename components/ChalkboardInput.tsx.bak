@@ -29,8 +29,7 @@ const ListSelectionModal: React.FC<{
   onSelect: (value: string) => void;
   onClose: () => void;
   onDelete: (value: string) => void;
-  isDeletable?: (value: string) => boolean;
-}> = ({ isOpen, options, onSelect, onClose, onDelete, isDeletable = () => true }) => {
+}> = ({ isOpen, options, onSelect, onClose, onDelete }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -92,15 +91,10 @@ const ListSelectionModal: React.FC<{
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onDelete(option);
-                                        }}
-                                        disabled={!isDeletable(option)}
-                                        className={`p-2 rounded-full ml-2 flex-shrink-0 transition-colors ${
-                                            isDeletable(option)
-                                                ? 'text-red-500 hover:text-red-700 hover:bg-red-100'
-                                                : 'text-gray-300 cursor-not-allowed'
-                                        }`}
+                                        }} 
+                                        className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100 ml-2 flex-shrink-0"
                                         aria-label={`Delete option: ${option}`}
-                                        title={isDeletable(option) ? "Delete" : "この項目は削除できません"}
+                                        title="Delete"
                                     >
                                         <TrashIcon />
                                     </button>
@@ -310,14 +304,9 @@ export const WhiteboardGridInput: React.FC<WhiteboardGridInputProps> = ({ texts,
   const notificationTimerRef = useRef<number | null>(null);
   const [confirmationModal, setConfirmationModal] = useState<{
     isOpen: boolean;
-    message: string;
-    onConfirm: () => void;
-  }>({
-    isOpen: false,
-    message: '',
-    onConfirm: () => {},
-  });
-
+    listId: 'field-1' | 'field-2' | null;
+    listName: string;
+  }>({ isOpen: false, listId: null, listName: '' });
 
   const showNotification = useCallback((message: string, type: 'success' | 'error') => {
       if (notificationTimerRef.current) {
@@ -600,19 +589,29 @@ useEffect(() => {
     setIsModalOpen(false);
   };
 
-  const handleCancelConfirmation = () => {
-    setConfirmationModal({ isOpen: false, message: '', onConfirm: () => {} });
+  const handleBulkDeleteClick = (listId: 'field-1' | 'field-2') => {
+    setConfirmationModal({
+      isOpen: true,
+      listId,
+      listName: listId === 'field-1' ? LABELS[0] : LABELS[2],
+    });
   };
 
-  const handleConfirmBulkDelete = async (listId: 'field-1' | 'field-2') => {
-    const listName = listId === 'field-1' ? LABELS[0] : LABELS[2];
+  const handleCancelDelete = () => {
+    setConfirmationModal({ isOpen: false, listId: null, listName: '' });
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!confirmationModal.listId) return;
+  
+    const { listId, listName } = confirmationModal;
     const setter = listId === 'field-1' ? setSavedOptionsForField1 : setSavedOptionsForField2;
   
     if (!isOnline) {
       setter([]);
       offlineManager.addToQueue({ type: 'replace', listId, newList: [] });
       showNotification(`オフラインです。「${listName}」リストをローカルで削除しました。`, 'success');
-      handleCancelConfirmation();
+      handleCancelDelete();
       return;
     }
   
@@ -630,55 +629,37 @@ useEffect(() => {
       showNotification('削除中にエラーが発生しました。', 'error');
     } finally {
       setIsLoading(false);
-      handleCancelConfirmation();
-    }
-  };
-  
-  const handleBulkDeleteClick = (listId: 'field-1' | 'field-2') => {
-    const listName = listId === 'field-1' ? LABELS[0] : LABELS[2];
-    setConfirmationModal({
-      isOpen: true,
-      message: `本当に「${listName}」リストの全ての項目を削除しますか？この操作は元に戻せません。`,
-      onConfirm: () => handleConfirmBulkDelete(listId),
-    });
-  };
-
-  const performSingleItemDelete = async (listId: string, itemToDelete: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    if (!isOnline) {
-        setter(prev => prev.filter(item => item !== itemToDelete));
-        offlineManager.addToQueue({ type: 'delete', listId, item: itemToDelete });
-        showNotification("オフラインです。ローカルで削除しました。", 'success');
-        handleCancelConfirmation();
-        return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await api.deleteItem(listId, itemToDelete);
-      if (response.success && response.newList) {
-        setter(response.newList);
-        showNotification("項目を削除しました。", 'success');
-      } else {
-        showNotification(response.message || "削除に失敗しました。", 'error');
-      }
-    } catch (error) {
-      console.error(`Failed to delete item from list ${listId}:`, error);
-      showNotification("削除に失敗しました。", 'error');
-    } finally {
-      setIsLoading(false);
-      handleCancelConfirmation();
+      handleCancelDelete();
     }
   };
 
   const getModalProps = () => {
     const createDeleteHandler = (listId: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-      return (optionToDelete: string) => {
+      return async (optionToDelete: string) => {
         setIsModalOpen(false); 
-        setConfirmationModal({
-            isOpen: true,
-            message: `本当に「${optionToDelete}」を削除しますか？`,
-            onConfirm: () => performSingleItemDelete(listId, optionToDelete, setter),
-        });
+
+        if (!isOnline) {
+            setter(prev => prev.filter(item => item !== optionToDelete));
+            offlineManager.addToQueue({ type: 'delete', listId, item: optionToDelete });
+            showNotification("オフラインです。ローカルで削除しました。", 'success');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+          const response = await api.deleteItem(listId, optionToDelete);
+          if (response.success && response.newList) {
+            setter(response.newList);
+            showNotification("項目を削除しました。", 'success');
+          } else {
+            showNotification(response.message || "削除に失敗しました。", 'error');
+          }
+        } catch (error) {
+          console.error(`Failed to delete item from list ${listId}:`, error);
+          showNotification("削除に失敗しました。", 'error');
+        } finally {
+          setIsLoading(false);
+        }
       };
     };
 
@@ -700,18 +681,11 @@ useEffect(() => {
         onDelete: createDeleteHandler('field-3', setSavedOptionsForField3),
       };
     }
-    return { options: [], onDelete: () => {} };
+    return { options: [], onDelete: async () => {} };
   };
   const modalProps = getModalProps();
   const isUIBlocked = isLoading || isSyncing;
 
-  const isOptionDeletable = useCallback((option: string) => {
-    if (currentTargetIndex !== 5) { // index 5 is for '種類' (field-3)
-        return true;
-    }
-    return !DEFAULT_OPTIONS_FIELD_3.includes(option);
-  }, [currentTargetIndex]);
-  
   const commonInputClasses = "w-full bg-transparent text-center text-lg font-marker text-gray-900 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition py-3 px-1 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:text-gray-500";
   const commonTextareaClasses = `${commonInputClasses} resize-none overflow-hidden`;
 
@@ -721,7 +695,7 @@ useEffect(() => {
         <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
             ホワイトボード入力欄
         </label>
-        <div className="grid grid-cols-[3fr_7fr] gap-x-2 gap-y-1 items-start">
+        <div className="grid grid-cols-[3fr_7fr] gap-2 items-start">
             {texts.map((text, index) => {
               if ([0, 2, 4, 6, 8].includes(index)) {
                 return (
@@ -731,7 +705,7 @@ useEffect(() => {
                     value={text}
                     readOnly
                     rows={1}
-                    className={`${commonTextareaClasses} bg-gray-200 cursor-not-allowed sm:mt-0`}
+                    className={`${commonTextareaClasses} bg-gray-200 cursor-not-allowed`}
                     aria-label={`ラベル: ${LABELS[index]}`}
                   />
                 );
@@ -810,10 +784,10 @@ useEffect(() => {
         <div className="mt-4 grid grid-cols-2 gap-4 items-start">
             <div className="text-center">
                 <h4 className="text-sm font-bold text-gray-600 mb-2">{LABELS[0]} リスト</h4>
-                <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col sm:flex-row justify-center gap-2">
                     <button
                         onClick={handleImportClick1}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-600'}`}
                         disabled={isUIBlocked}
                     >
                         <ImportIcon />
@@ -821,7 +795,7 @@ useEffect(() => {
                     </button>
                     <button
                         onClick={() => handleExportClick('field-1')}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
                         disabled={isUIBlocked}
                         title={`${LABELS[0]}リストを.txtファイルとしてエクスポート`}
                     >
@@ -830,7 +804,7 @@ useEffect(() => {
                     </button>
                     <button
                         onClick={() => handleBulkDeleteClick('field-1')}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked || savedOptionsForField1.length === 0 ? 'bg-red-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked || savedOptionsForField1.length === 0 ? 'bg-red-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
                         disabled={isUIBlocked || savedOptionsForField1.length === 0}
                         title={`${LABELS[0]}リストの全項目を削除`}
                     >
@@ -841,10 +815,10 @@ useEffect(() => {
             </div>
             <div className="text-center">
                 <h4 className="text-sm font-bold text-gray-600 mb-2">{LABELS[2]} リスト</h4>
-                <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col sm:flex-row justify-center gap-2">
                     <button
                         onClick={handleImportClick2}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-600'}`}
                         disabled={isUIBlocked}
                     >
                         <ImportIcon />
@@ -852,7 +826,7 @@ useEffect(() => {
                     </button>
                      <button
                         onClick={() => handleExportClick('field-2')}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
                         disabled={isUIBlocked}
                         title={`${LABELS[2]}リストを.txtファイルとしてエクスポート`}
                     >
@@ -861,7 +835,7 @@ useEffect(() => {
                     </button>
                     <button
                         onClick={() => handleBulkDeleteClick('field-2')}
-                        className={`flex w-full items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked || savedOptionsForField2.length === 0 ? 'bg-red-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
+                        className={`flex w-full sm:w-auto items-center justify-center text-white font-bold py-2 px-3 rounded-md transition-transform transform hover:scale-105 shadow text-xs ${isUIBlocked || savedOptionsForField2.length === 0 ? 'bg-red-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
                         disabled={isUIBlocked || savedOptionsForField2.length === 0}
                         title={`${LABELS[2]}リストの全項目を削除`}
                     >
@@ -893,13 +867,12 @@ useEffect(() => {
             onSelect={handleModalSelect}
             onClose={handleModalClose}
             onDelete={modalProps.onDelete}
-            isDeletable={isOptionDeletable}
         />
         <ConfirmationModal
             isOpen={confirmationModal.isOpen}
-            message={confirmationModal.message}
-            onConfirm={confirmationModal.onConfirm}
-            onCancel={handleCancelConfirmation}
+            message={`本当に「${confirmationModal.listName}」リストの全ての項目を削除しますか？この操作は元に戻せません。`}
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
             isProcessing={isLoading}
         />
     </div>

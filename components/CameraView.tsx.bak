@@ -12,11 +12,10 @@ export const CameraView: React.FC<CameraViewProps> = ({ videoRef, facingMode, on
     let stream: MediaStream | null = null;
     const setupCamera = async () => {
       try {
-        const constraints = {
+        stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode, width: { ideal: 1080 } },
           audio: false,
-        };
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -25,7 +24,7 @@ export const CameraView: React.FC<CameraViewProps> = ({ videoRef, facingMode, on
         }
       } catch (err) {
         console.error("Error accessing camera:", err);
-        alert("Could not access camera. Please ensure you have granted permission.");
+        alert("Could not access the camera. Please ensure you've granted permission in your browser settings.");
       }
     };
 
