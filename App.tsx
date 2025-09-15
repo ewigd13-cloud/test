@@ -523,9 +523,8 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-gray-800 min-h-screen flex flex-col items-center justify-center p-4">
-               
-        <div className="w-full max-w-lg mx-auto flex flex-row items-center gap-8">
-            <main ref={mainRef} className="flex-1 aspect-[4/3] bg-black rounded-lg shadow-2xl overflow-hidden relative">
+        <div className={`w-full max-w-4xl mx-auto flex ${imageSrc ? 'flex-col' : 'flex-row items-center'} gap-4 md:gap-8`}>
+            <main ref={mainRef} className={`aspect-[4/3] bg-black rounded-lg shadow-2xl overflow-hidden relative ${imageSrc ? 'w-full' : 'flex-1'}`}>
                 {imageSrc ? (
                     <img src={imageSrc} alt="撮影した写真" className="w-full h-full object-contain" />
                 ) : (
@@ -553,49 +552,45 @@ const App: React.FC = () => {
                 <canvas ref={canvasRef} className="hidden"></canvas>
             </main>
 
-            <div className="flex flex-col items-center justify-center gap-y-6">
-                {!imageSrc ? (
-                    <>
-                        {isCountingDown ? (
-                            <button onClick={handleCancelCountdown} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-5 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50" aria-label="タイマーをキャンセル">
-                                <CloseIcon className="h-8 w-8" />
-                            </button>
-                        ) : (
-                            <button onClick={handleCapture} className="bg-red-600 hover:bg-red-700 text-white font-bold p-5 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50 disabled:bg-red-900 disabled:cursor-not-allowed" aria-label="写真を撮る" disabled={uiDisabled}>
-                                <CameraIcon />
-                            </button>
-                        )}
-                        
-                        {hasFlash && (
-                          <button 
-                              onClick={toggleFlash} 
-                              title={isFlashEnabled ? "フラッシュ OFF" : "フラッシュ ON"} 
-                              className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isFlashEnabled ? 'ring-4 ring-yellow-400' : ''}`} 
-                              aria-label="フラッシュの切り替え"
-                              disabled={uiDisabled}
-                          >
-                              <FlashIcon />
-                          </button>
-                        )}
-
-                        <button 
-                            onClick={() => setIsTimerEnabled(!isTimerEnabled)} 
-                            title={isTimerEnabled ? "タイマー OFF" : "10秒タイマー ON"} 
-                            className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isTimerEnabled ? 'ring-4 ring-blue-500' : ''}`} 
-                            aria-label="タイマーの切り替え"
-                            disabled={uiDisabled}
-                        >
-                            <TimerIcon />
+            {!imageSrc && (
+                <div className="flex flex-col items-center justify-center gap-4 w-20">
+                    {isCountingDown ? (
+                        <button onClick={handleCancelCountdown} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-3 md:p-4 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50" aria-label="タイマーをキャンセル">
+                            <CloseIcon className="h-6 w-6 md:h-8 md:w-8" />
                         </button>
-                    </>
-                ) : (
-                    <div className="w-[72px]">&nbsp;</div>
-                )}
-            </div>
+                    ) : (
+                        <button onClick={handleCapture} className="bg-red-600 hover:bg-red-700 text-white font-bold p-3 md:p-4 rounded-full transition-transform transform hover:scale-105 shadow-lg ring-4 ring-white ring-opacity-25 focus:outline-none focus:ring-opacity-50 disabled:bg-red-900 disabled:cursor-not-allowed" aria-label="写真を撮る" disabled={uiDisabled}>
+                            <CameraIcon className="h-6 w-6 md:h-8 md:w-8" />
+                        </button>
+                    )}
+                    
+                    {hasFlash && (
+                      <button 
+                          onClick={toggleFlash} 
+                          title={isFlashEnabled ? "フラッシュ OFF" : "フラッシュ ON"} 
+                          className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-3 md:p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isFlashEnabled ? 'ring-4 ring-yellow-400' : ''}`} 
+                          aria-label="フラッシュの切り替え"
+                          disabled={uiDisabled}
+                      >
+                          <FlashIcon className="h-5 w-5 md:h-6 md:w-6" />
+                      </button>
+                    )}
+
+                    <button 
+                        onClick={() => setIsTimerEnabled(!isTimerEnabled)} 
+                        title={isTimerEnabled ? "タイマー OFF" : "10秒タイマー ON"} 
+                        className={`bg-gray-600 hover:bg-gray-700 text-white font-bold p-3 md:p-4 rounded-full transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-800 disabled:cursor-not-allowed ${isTimerEnabled ? 'ring-4 ring-blue-500' : ''}`} 
+                        aria-label="タイマーの切り替え"
+                        disabled={uiDisabled}
+                    >
+                        <TimerIcon className="h-5 w-5 md:h-6 md:w-6" />
+                    </button>
+                </div>
+            )}
         </div>
 
         {!imageSrc && (
-            <div className="w-full max-w-lg mx-auto mt-4">
+            <div className="w-full max-w-4xl mx-auto mt-4">
                 <label htmlFor="whiteboard-scale" className="block text-sm font-medium text-white mb-2 text-center">
                     ホワイトボードのサイズ調整
                 </label>
@@ -613,11 +608,11 @@ const App: React.FC = () => {
             </div>
         )}
 
-        <footer className="mt-6 w-full max-w-3xl mx-auto">
+        <footer className="mt-6 w-full max-w-4xl mx-auto">
             {imageSrc ? (
                 <div className="flex justify-center items-center gap-4">
                     <button onClick={retakePhoto} className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
-                        <RetakeIcon /> 再撮影
+                        再撮影
                     </button>
                     <button onClick={downloadPhoto} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
                         <DownloadIcon /> ダウンロード
