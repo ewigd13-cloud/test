@@ -2,8 +2,8 @@ const CACHE_NAME = 'whiteboard-photo-booth-v1';
 const urlsToCache = [
   '/test/',
   '/test//index.html',
-  '/test//assets/index-CiNs-NXS.js',
-  '/test//assets/manifest-D-tl_hVr.json'
+  '/test/assets/index-CiNs-NXS.js',
+  '/test/assets/manifest-D-tl_hVr.json'
 ];
 
 const externalResources = [
@@ -55,7 +55,7 @@ self.addEventListener('fetch', event => {
   // Reactルーティング対応（navigateモード）
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('./index.html').then(response => response || fetch(event.request))
+      caches.match('/test/index.html').then(response => response || fetch(event.request))
     );
     return;
   }
@@ -82,7 +82,7 @@ self.addEventListener('fetch', event => {
           return networkResponse;
         }).catch(err => {
           console.error('Fetch failed; returning offline fallback.', err);
-          return caches.match('./index.html');
+          return caches.match('/test/index.html');
         });
       });
     })
