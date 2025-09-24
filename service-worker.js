@@ -2,7 +2,7 @@ const CACHE_NAME = 'whiteboard-photo-booth-v1';
 const urlsToCache = [
   './',
   './index.html',
-  './assets/index-rQ6P09Eo',
+  './assets/index-CiNs-NXS',
   './assets/style.css'
 ];
 
