@@ -2,8 +2,8 @@ const CACHE_NAME = 'whiteboard-photo-booth-v1';
 const urlsToCache = [
   './',
   './index.html',
-  './assets/index-CiNs-NXS',
-  './assets/style.css'
+  './assets/index-CiNs-NXS.js',
+  './assets/manifest-D-tl_hVr.json'
 ];
 
 const externalResources = [
