@@ -1,9 +1,9 @@
 const CACHE_NAME = 'whiteboard-photo-booth-v1';
 const urlsToCache = [
-  './',
-  './index.html',
-  './assets/index-CiNs-NXS.js',
-  './assets/manifest-D-tl_hVr.json'
+  '/test/',
+  '/test//index.html',
+  '/test//assets/index-CiNs-NXS.js',
+  '/test//assets/manifest-D-tl_hVr.json'
 ];
 
 const externalResources = [
@@ -15,7 +15,12 @@ self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      await cache.addAll(urlsToCache);
+      try {
+        await cache.addAll(urlsToCache);
+      } catch (err) {
+        console.error('キャッシュ失敗:', err);
+      }
+
       for (const url of externalResources) {
         try {
           await cache.add(url);
