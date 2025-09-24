@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whiteboard Photo Booth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="manifest" href="./manifest.json" />
+    <link rel="manifest" href="/test/assets/manifest-Bo7G4h0w.json" />
     <style>
       body {
         font-family: 'Noto Serif JP', serif;
@@ -37,6 +38,7 @@
       }
     </style>
 
+<link rel="stylesheet" href="/index.css">
   <script type="importmap">
 {
   "imports": {
@@ -46,15 +48,14 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/test/assets/index-C6hzz_vH.js"></script>
-  <link rel="stylesheet" crossorigin href="/test/assets/index-CcnpDfVJ.css">
+  <script type="module" crossorigin src="/test/assets/index-rQ6P09Eo.js"></script>
 </head>
   <body>
     <div id="root"></div>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/test/service-worker.js')
+          navigator.serviceWorker.register('/service-worker.js')
             .then(registration => {
               console.log('Service Worker registered with scope:', registration.scope);
             })
